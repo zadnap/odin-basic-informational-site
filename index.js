@@ -1,38 +1,47 @@
-const http = require('node:http');
-const fs = require('node:fs');
-const path = require('node:path');
+import express from 'express'
+import path from 'path';
 
-const server = http.createServer((req, res) => {
-  let filePath = '';
-  const requestPath = req.url;
+const app = express();
+const PORT = 3000;
+const __dirname = path.resolve(); 
 
-  switch (requestPath) {
-    case '/':
-        filePath = path.join(__dirname, 'index.html');
-        break;
-    case '/about':
-        filePath = path.join(__dirname, 'about.html');
-        break;
-    case '/contact-me':
-        filePath = path.join(__dirname, 'contact-me.html');
-        break;
-    default:
-        filePath = path.join(__dirname, '404.html');
-        break;
-  }
-
-  fs.readFile(filePath, (err, data) => {
+app.get("/", (req, res) => {
+  const filePath = path.join(__dirname, "index.html");
+  res.sendFile(filePath, (err) => {
     if (err) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Internal Server Error');
-      return;
+      console.error(err);
+      res.status(500).send("Failed to send HTML");
     }
-
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(data);
   });
 });
 
-server.listen(8080, () => {
-  console.log('Server running at http://localhost:8080/');
+app.get("/about", (req, res) => {
+  const filePath = path.join(__dirname, "about.html");
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Failed to send HTML");
+    }
+  });
+});
+
+app.get("/contact", (req, res) => {
+  const filePath = path.join(__dirname, "contact-me.html");
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Failed to send HTML");
+    }
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "404.html"));
+});
+
+app.listen(PORT, (error) => {
+  if (error) {
+    throw error;
+  }
+  console.log(`My first Express app - listening on port ${PORT}!`);
 });
